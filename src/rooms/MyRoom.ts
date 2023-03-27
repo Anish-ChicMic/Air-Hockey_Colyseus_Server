@@ -1,57 +1,128 @@
 import { Room, Client } from "colyseus";
-import { MyRoomState } from "./schema/MyRoomState";
+import { MyRoomState, Vec2 } from "./schema/MyRoomState";
+import { type, Schema, MapSchema, ArraySchema } from '@colyseus/schema';
 
 export class MyRoom extends Room<MyRoomState> {
   room: any;
+  topPlayer: string = "";
+  bottomPlayer: string = "";
 
   onCreate(options: any) {
+
     this.setState(new MyRoomState());
 
+    this.setSimulationInterval((deltaTime) => this.update(deltaTime));
 
+    this.onMessage("strikerMoved", (client, data) => {
+      let senderSpeedQueue = data.speedQueue;
+      let newSpeedQueue = new ArraySchema<Vec2>();
 
+      if (client.sessionId === this.topPlayer) {
+        console.log("changing topPlayer state>>>>>>>");
+        this.state.playerTop.x = data.positions.x;
+        this.state.playerTop.y = data.positions.y;
 
+        senderSpeedQueue.forEach((point: { x: number; y: number; }) => {
+          let vec2 = new Vec2();
+          vec2.x = point.x;
+          vec2.y = point.y;
+          newSpeedQueue.push(vec2);
+        });
+        // console.log("Pushing: ", newSpeedQueue);
+        this.state.playerTop.speedQueue = newSpeedQueue;
+      }
+      else {
+        console.log("changing bottomPlayer state>>>>>>>");
+        this.state.playerBottom.x = data.positions.x;
+        this.state.playerBottom.y = data.positions.y;
 
+        senderSpeedQueue.forEach((point: { x: number; y: number; }) => {
+          let vec2 = new Vec2();
+          vec2.x = point.x;
+          vec2.y = point.y;
+          newSpeedQueue.push(vec2);
+        });
 
-    this.onMessage('puckVel', (client, data) => {
-      // console.log("puckVelChanged.....");
-      // this.broadcast('puckVel', data);
+        // console.log("Pushing: ", newSpeedQueue);
+        this.state.playerBottom.speedQueue = newSpeedQueue;
+      }
+
+      // console.log("striker sync: ", typeof data.speedQueue);
     })
 
 
-    this.onMessage('samePuckMove', (client, data) => {
-      // console.log("samePuckMove.....");
 
-      let newState = new MyRoomState();
+    // this.onMessage("PuckState", (client, data) =>{
+    //   this.state.PuckState.x = data.position.x;
+    //   this.state.PuckState.y = data.position.y;
+    //   this.state.PuckState.angularVelocity = data.angularVelocity;
+    //   this.state.PuckState.velocityX = data.velocity.x;
+    //   this.state.PuckState.velocityY = data.velocity.y;
+    //   // console.log("Puck State Changing At Server::::::::", data);
+    // })
 
-      newState.playerStrS.x = data.pos.x;
-      newState.playerStrS.y = data.pos.y;
+  }
 
-      newState.PuckStateS.x = data.puckData.positionX;
-      newState.PuckStateS.y = data.puckData.positionY;
-      newState.PuckStateS.angularVelocity = data.puckData.angularVelocity;
-      console.log("Received Data In Room", data)
-      // newState.PuckStateS.velocityX = data.puckData.velocityX;
-      // newState.PuckStateS.velocityY = data.puckData.velocityY;
-      newState.PuckStateS.velocityX = 10;
-      newState.PuckStateS.velocityY = 2;
-      console.log("Setting Regular State................", newState.PuckStateS.velocityX);
-      this.setState(newState);
-      // console.log(newState.playerStrS.getPos);
+
+
+
+  update(deltaTime: number) {
+    this.onMessage("PuckState", (client, data) => {
+      this.state.PuckState.client = client.sessionId;
+      this.state.PuckState.x = data.position.x;
+      this.state.PuckState.y = data.position.y;
+      this.state.PuckState.angularVelocity = data.angularVelocity;
+      this.state.PuckState.velocityX = data.velocity.x;
+      this.state.PuckState.velocityY = data.velocity.y;
+      // console.log("Puck State Changing At Server::::::::", data);
     })
 
-    console.log("Room created");
 
+
+    // this.onMessage('setPlayers', (client, message) => {
+    //   console.log("setting players");
+    //   if (!this.topPlayer.length) {
+    //     this.topPlayer = client.sessionId;
+    //     this.state.playerInfo.topPlayer = this.topPlayer;
+    //   }
+    //   else {
+    //     this.bottomPlayer = client.sessionId;
+    //     this.state.playerInfo.bottomPlayer = this.bottomPlayer;
+    //   }
+    //   // this.broadcast('setPlayer', message);
+    // });
 
   }
 
 
   onJoin(client: Client, options: any) {
-    let initState = new MyRoomState();
-    initState.playerStrS.y = -377.848;
-    console.log("Setting Initial State................");
-    this.setState(initState);
-
     console.log(client.sessionId, "joined!");
+
+    if (!this.topPlayer.length) {
+      this.topPlayer = client.sessionId;
+      this.state.playerInfo.topPlayer = this.topPlayer;
+    }
+    else {
+      this.bottomPlayer = client.sessionId;
+      this.state.playerInfo.bottomPlayer = this.bottomPlayer;
+    }
+
+    // console.log("TopPlayer::::: " + this.topPlayer);
+    // console.log("BottomPlayer::::: " + this.bottomPlayer);
+
+
+    // this.onMessage('setPlayers', (client, message) => {
+    //   if (!this.topPlayer.length) {
+    //     this.topPlayer = client.sessionId;
+    //     this.state.playerInfo.topPlayer = this.topPlayer;
+    //   }
+    //   else {
+    //     this.bottomPlayer = client.sessionId;
+    //     this.state.playerInfo.bottomPlayer = this.bottomPlayer;
+    //   }
+    //   this.broadcast('strikerPosChange', message, { except: client });
+    // });
+
   }
 
   onLeave(client: Client, consented: boolean) {

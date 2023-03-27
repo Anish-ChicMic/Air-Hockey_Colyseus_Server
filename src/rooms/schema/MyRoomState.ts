@@ -1,19 +1,32 @@
 import { Context } from "@colyseus/schema";
 import { type, Schema, MapSchema, ArraySchema } from '@colyseus/schema';
 
-// class World extends Schema {
-//   @type("number") x: number;
-//   @type("number") y: number;
 
-// }
+class playerInfo extends Schema {
+  @type("string") topPlayer: string;
+  @type("string") bottomPlayer: string;
 
-// class puckPosition extends Schema {
-//   @type("number") x: number;
-//   @type("number") y: number;
-// }
+  constructor() {
+    super();
+    this.topPlayer = "";
+    this.bottomPlayer = "";
+  }
+}
 
+
+export class Vec2 extends Schema {
+  @type("number") x: number;
+  @type("number") y: number;
+
+  constructor() {
+    super();
+    this.x = 0;
+    this.y = 0;
+  }
+}
 
 class PuckState extends Schema {
+  @type("string") client: string // Cleient who changed PuckState recently
   @type("number") x: number;
   @type("number") y: number;
   @type("number") angularVelocity: number;
@@ -30,32 +43,46 @@ class PuckState extends Schema {
   }
 }
 
-class playerStr extends Schema {
+class playerTop extends Schema {
   @type("number") x: number;
   @type("number") y: number;
-  // @type() velocityQueue: ArraySchema;
-
+  @type([Vec2]) speedQueue: ArraySchema;
 
   constructor() {
     super();
     this.x = 0;
-    this.y = 0;
-    // this.velocityQueue = []
+    this.y = 377;
+
+    this.speedQueue = new ArraySchema<Vec2>();
+    for (let i = 0; i < 5; i++) {
+      this.speedQueue.push(new Vec2());
+    }
   }
 
-  set getPos(data: any) {
+}
+
+class playerBottom extends Schema {
+  @type("number") x: number;
+  @type("number") y: number;
+  @type([Vec2]) speedQueue: ArraySchema;
+
+  constructor() {
+    super();
     this.x = 0;
-    this.y = 0;
-    console.log("room state set..........");
+    this.y = -377;
+
+    this.speedQueue = new ArraySchema<Vec2>();
+    for (let i = 0; i < 5; i++) {
+      this.speedQueue.push(new Vec2());
+    }
   }
-  get getPos() {
-    return [this.x, this.y];
-  }
+
 }
 
 export class MyRoomState extends Schema {
-  // @type({ map: playerStr }) playerStrS = new MapSchema<playerStr>();
-  @type(playerStr) playerStrS = new playerStr();
-  @type(PuckState) PuckStateS = new PuckState();
+  // @type({map: playerStriker}) players = new MapSchema<playerStriker>();
+  @type(playerInfo) playerInfo = new playerInfo();
+  @type(playerTop) playerTop = new playerTop();
+  @type(playerBottom) playerBottom = new playerBottom();
+  @type(PuckState) PuckState = new PuckState();
 }
-
