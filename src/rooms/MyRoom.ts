@@ -18,7 +18,7 @@ export class MyRoom extends Room<MyRoomState> {
       let newSpeedQueue = new ArraySchema<Vec2>();
 
       if (client.sessionId === this.topPlayer) {
-        console.log("changing topPlayer state>>>>>>>");
+        console.log("changing topPlayer state>>>>>>>", data.positions.x / 10, data.positions.y / 10);
         this.state.playerTop.x = data.positions.x;
         this.state.playerTop.y = data.positions.y;
 
@@ -69,13 +69,14 @@ export class MyRoom extends Room<MyRoomState> {
   update(deltaTime: number) {
     this.onMessage("PuckState", (client, data) => {
       this.state.PuckState.client = client.sessionId;
-      this.state.PuckState.x = data.position.x;
-      this.state.PuckState.y = data.position.y;
-      this.state.PuckState.angularVelocity = data.angularVelocity;
-      this.state.PuckState.velocityX = data.velocity.x;
-      this.state.PuckState.velocityY = data.velocity.y;
+      this.state.PuckState.x = data.position.x * 10;
+      this.state.PuckState.y = data.position.y * 10;
+      this.state.PuckState.angularVelocity = data.angularVelocity * 10;
+      this.state.PuckState.velocityX = data.velocity.x * 10;
+      this.state.PuckState.velocityY = data.velocity.y * 10;
       // console.log("Puck State Changing At Server::::::::", data);
     })
+
 
 
 
