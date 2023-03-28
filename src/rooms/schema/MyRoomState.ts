@@ -35,7 +35,7 @@ class PuckState extends Schema {
 
   constructor() {
     super();
-    this.x = 0;
+    this.x = 5000;
     this.y = 0;
     this.angularVelocity = 0;
     this.velocityX = 0;
@@ -81,8 +81,8 @@ class playerBottom extends Schema {
 
 export class MyRoomState extends Schema {
   // @type({map: playerStriker}) players = new MapSchema<playerStriker>();
+  @type(PuckState) PuckState = new PuckState();
   @type(playerInfo) playerInfo = new playerInfo();
   @type(playerTop) playerTop = new playerTop();
   @type(playerBottom) playerBottom = new playerBottom();
-  @type(PuckState) PuckState = new PuckState();
 }
