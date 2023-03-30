@@ -35,7 +35,7 @@ class PuckState extends Schema {
 
   constructor() {
     super();
-    this.x = 0;
+    this.x = 5000;
     this.y = 0;
     this.angularVelocity = 0;
     this.velocityX = 0;
@@ -51,7 +51,7 @@ class playerTop extends Schema {
   constructor() {
     super();
     this.x = 0;
-    this.y = 377;
+    this.y = 3077;
 
     this.speedQueue = new ArraySchema<Vec2>();
     for (let i = 0; i < 5; i++) {
@@ -79,8 +79,12 @@ class playerBottom extends Schema {
 
 }
 
+class players extends Schema {
+  @type("number") playersCount: number;
+}
+
 export class MyRoomState extends Schema {
-  // @type({map: playerStriker}) players = new MapSchema<playerStriker>();
+  @type({ map: "boolean" }) players = new MapSchema<boolean>();
   @type(playerInfo) playerInfo = new playerInfo();
   @type(playerTop) playerTop = new playerTop();
   @type(playerBottom) playerBottom = new playerBottom();

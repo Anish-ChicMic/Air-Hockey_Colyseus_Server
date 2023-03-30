@@ -18,7 +18,7 @@ export class MyRoom extends Room<MyRoomState> {
       let newSpeedQueue = new ArraySchema<Vec2>();
 
       if (client.sessionId === this.topPlayer) {
-        console.log("changing topPlayer state>>>>>>>", data.positions.x / 10, data.positions.y / 10);
+
         this.state.playerTop.x = data.positions.x;
         this.state.playerTop.y = data.positions.y;
 
@@ -32,7 +32,7 @@ export class MyRoom extends Room<MyRoomState> {
         this.state.playerTop.speedQueue = newSpeedQueue;
       }
       else {
-        console.log("changing bottomPlayer state>>>>>>>");
+
         this.state.playerBottom.x = data.positions.x;
         this.state.playerBottom.y = data.positions.y;
 
@@ -98,7 +98,7 @@ export class MyRoom extends Room<MyRoomState> {
 
   onJoin(client: Client, options: any) {
     console.log(client.sessionId, "joined!");
-
+    this.state.players.set(client.sessionId, true);
     if (!this.topPlayer.length) {
       this.topPlayer = client.sessionId;
       this.state.playerInfo.topPlayer = this.topPlayer;
@@ -127,6 +127,7 @@ export class MyRoom extends Room<MyRoomState> {
   }
 
   onLeave(client: Client, consented: boolean) {
+    this.state.players.delete(client.sessionId);
     console.log(client.sessionId, "left!");
   }
 
